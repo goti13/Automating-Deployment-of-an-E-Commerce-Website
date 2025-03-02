@@ -189,8 +189,48 @@ i. Integrate Jenkins with the source code management repository (GitHub)
 
 ii. Configure webhooks for automatic triggering of Jenkins builds.
 
+Creating a Freestyle Project
 
-For this project we will be using an exiting [repository](https://github.com/goti13/MarketPeak_Ecommerce)                  
+From the dashboard menu on the left side, click on new item
+
+<img width="1425" alt="image" src="https://github.com/user-attachments/assets/83c49d60-6be1-40d6-9e9e-4c868e611352" />
+
+ 
+ Create a freestyle project and name it "Capstone Job"
+
+<img width="1418" alt="image" src="https://github.com/user-attachments/assets/15fb195b-a88b-4694-96a6-8f999b986dc8" />
+
+**Connecting Jenkins To Our Source Code Management**
+
+For this project we will be using an exiting [repository](https://github.com/goti13/MarketPeak_Ecommerce)  MarketPeak_Ecommerce                
+
+Connect "jenkins' to 'MarketPeak_Ecommerce' repository by pasting the repository url in the area selected below. Make sure your current branch is 'main'
+
+<img width="1432" alt="image" src="https://github.com/user-attachments/assets/0508a8f4-d9c8-4153-9051-9049b48b24ec" />
+
+Select "Git" as the Source code management, paste the repository url in its field and use "*/main" as the Branch specifier 
+
+<img width="1344" alt="image" src="https://github.com/user-attachments/assets/aab23453-3c96-4c34-8104-d6926fff2e06" />
+
+Save configuration and run "build now" to connect jenkins to our repository
+
+<img width="1431" alt="image" src="https://github.com/user-attachments/assets/e0e0c418-2f68-47f8-b3e1-78433b1cea6a" />
+
+We have successfully connected jenkins with our github repository (MarketPeak_Ecommerce)
+
+**Configuring Build Trigger**
+
+Click "Configure" your job and add this configurations
+
+<img width="1428" alt="image" src="https://github.com/user-attachments/assets/84a07cea-9c69-4ec3-ab71-a380945ce855" />
+
+Click on build trigger to configure triggering the job from GitHub webhook
+
+
+
+
+
+
 
 
 
