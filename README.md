@@ -26,7 +26,6 @@ ii. Set up necessary plugins (Git, Docker, etc.)
 
 iii. Configure Jenkins with required security measures.
 
-INSTALL JENKINS ON A DEDICATED SERVER
 
 **Update packege repository**
 
@@ -164,6 +163,8 @@ sudo cat /var/lib/jenkins/secrets/initialAdminPassword
 
 ![image](https://github.com/user-attachments/assets/95198e5b-7a74-42fb-837f-8fb241aec8db)
 
+
+
 Install Suggested plugins
 
 ![image](https://github.com/user-attachments/assets/5f84fd80-c278-4a70-be7d-4fcb8215787e)
@@ -177,9 +178,19 @@ Login to Jenkins Console
 ![image](https://github.com/user-attachments/assets/90412701-8154-42e2-a82d-ad39d56e322e)
 
 
+2. Source Code Management Repository Integration
+
+**Objective: Connect Jenkins to the version control system for source code management.**
 
 
+Steps:
 
+i. Integrate Jenkins with the source code management repository (GitHub)
+
+ii. Configure webhooks for automatic triggering of Jenkins builds.
+
+
+For this project we will be using an exiting [repository](https://github.com/goti13/MarketPeak_Ecommerce)                    : 
 
 
 
