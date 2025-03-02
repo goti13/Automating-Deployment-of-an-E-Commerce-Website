@@ -190,7 +190,7 @@ i. Integrate Jenkins with the source code management repository (GitHub)
 ii. Configure webhooks for automatic triggering of Jenkins builds.
 
 
-For this project we will be using an exiting [repository](https://github.com/goti13/MarketPeak_Ecommerce)                    : 
+For this project we will be using an exiting [repository](https://github.com/goti13/MarketPeak_Ecommerce)                  
 
 
 
