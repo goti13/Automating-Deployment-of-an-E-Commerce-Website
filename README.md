@@ -241,6 +241,117 @@ Create a github webhook using jenkins ip address and port
 
 
 
+4. Jenkins Pipeline for Web Application
+   
+Objective: Develop a Jenkins Pipeline for running a web application.
+
+Steps:
+
+Create a Jenkins Pipeline script to run a web application.
+
+
+Below is a Jekins pipeline script to run a web application:
+
+```
+
+pipeline {
+    agent any
+
+    environment {
+        APP_NAME = "marketpeak_ecommerce"
+        DOCKER_IMAGE = "your-dockerhub-username/marketpeak"
+        APP_PORT = "8081"
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git 'https://github.com/goti13/MarketPeak_Ecommerce.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $DOCKER_IMAGE .'
+            }
+        }
+
+        stage('Run Application') {
+            steps {
+                // Stop and remove any running instance of the container
+                sh 'docker stop $APP_NAME || true && docker rm $APP_NAME || true'
+
+                // Run the container on port 8081
+                sh 'docker run -d --name $APP_NAME -p $APP_PORT:80 $DOCKER_IMAGE'
+            }
+        }
+
+        stage('Push to DockerHub') {
+            when {
+                branch 'main'
+            }
+            steps {
+                withDockerRegistry([credentialsId: 'docker-hub-credentials', url: '']) {
+                    sh 'docker push $DOCKER_IMAGE'
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Application is running at http://<server-ip>:8081"
+        }
+        failure {
+            echo "Build failed. Check logs!"
+        }
+    }
+}
+
+
+```
+
+
+**From the dashboard menu on the left side, click on new item**
+
+<img width="1422" alt="image" src="https://github.com/user-attachments/assets/c2a9e58c-541d-455c-b0a0-6e883b3a76a2" />
+
+
+Create a pipeline job with name "Capstone pipeline job"
+
+
+<img width="1420" alt="image" src="https://github.com/user-attachments/assets/bf00cfe8-75b0-445b-90ec-76fe2a37f1cb" />
+
+
+**Configure Build Trigger**
+
+Click on build trigger to configure triggering the job from GitHub webhook
+
+
+<img width="1189" alt="image" src="https://github.com/user-attachments/assets/cf2331d3-65b1-4f34-879e-e8811d99d629" />
+
+
+Create a github webhook using jenkins ip address and port (No need to repeat. We have already done this in the previous section)
+
+
+<img width="1188" alt="image" src="https://github.com/user-attachments/assets/ace66165-8ee5-4af0-925c-54f1e6f2457e" />
+
+
+Lets write our pipeline script
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
