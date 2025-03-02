@@ -226,6 +226,18 @@ Click "Configure" your job and add this configurations
 
 Click on build trigger to configure triggering the job from GitHub webhook
 
+<img width="1222" alt="image" src="https://github.com/user-attachments/assets/a615aeef-2598-4365-8275-a6307cfa47c6" />
+
+Create a github webhook using jenkins ip address and port
+
+<img width="1163" alt="image" src="https://github.com/user-attachments/assets/87722466-f5e9-4891-95c0-fb4310f2223c" />
+
+
+<img width="1188" alt="image" src="https://github.com/user-attachments/assets/ace66165-8ee5-4af0-925c-54f1e6f2457e" />
+
+
+
+
 
 
 
