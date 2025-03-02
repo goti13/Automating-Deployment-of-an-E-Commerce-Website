@@ -20,10 +20,12 @@ The goal is to achieve continuous intearation, continuous deployment and ensure 
 
 Steps:
 i. Install Jenkins on a dedicated server.
-ii. Set up necessary plugins (Git, Docker, etc.).
+
+ii. Set up necessary plugins (Git, Docker, etc.)
+
 iii. Configure Jenkins with required security measures.
 
-# Install Jenkins on a dedicated server
+INSTALL JENKINS ON A DEDICATED SERVER
 
 **Update packege repository**
 
