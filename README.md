@@ -19,6 +19,7 @@ The goal is to achieve continuous intearation, continuous deployment and ensure 
 **Objective: Configure Jenkins server for Cl/CD pipeline automation**
 
 Steps:
+
 i. Install Jenkins on a dedicated server.
 
 ii. Set up necessary plugins (Git, Docker, etc.)
