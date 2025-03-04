@@ -291,7 +291,7 @@ Steps:
 
 - Configure Jenkins to build Docker images.
 - ﻿﻿Run a container using the built docker image
-- ﻿﻿Access the web application on your we browser.
+- ﻿﻿Access the web application on your web browser.
 - ﻿﻿Push Docker images to a container registry.
 
 
@@ -602,6 +602,15 @@ Description: "DockerHub Credentials"
 
 
 <img width="1148" alt="image" src="https://github.com/user-attachments/assets/aca90be5-55c8-4f27-86a9-a1d7bf8eb165" />
+
+
+**Accessing our Application on web browser**
+
+
+To access the index.html of our application file on our web browser, we need to first edit the inbound rules and open the port we mapped our container to (8081)
+
+
+<img width="1434" alt="image" src="https://github.com/user-attachments/assets/eb8dd13a-963a-4970-b332-d21ccce93ad8" />
 
 
 
