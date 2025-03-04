@@ -571,7 +571,8 @@ Jenkins prints the application URL if successful.
 
 
 
-<img width="1355" alt="image" src="https://github.com/user-attachments/assets/8f1de1d7-2730-4590-a234-cd5121206b26" />
+<img width="1320" alt="image" src="https://github.com/user-attachments/assets/6b73ee6c-6702-44c8-ab13-8cd21aef491a" />
+
 
 
 
