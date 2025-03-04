@@ -257,9 +257,127 @@ Below is a Jekins pipeline script to run a web application:
 pipeline {
     agent any
 
+    stages {
+        stage('Connect To Github') {
+            steps {
+                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/goti13/jenkins-scm.git']])
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh 'docker build -t myapp .'
+                }
+            }
+        }
+        stage('Run Docker Container') {
+            steps {
+                script {
+                    sh 'docker run -itd -p 8081:80 myapp'
+                }
+            }
+        }
+    }
+}
+
+
+```
+
+5. Docker Image Creation and Registry Push
+
+Objective: To Automate the creation of Docker images for the web application and push them to a container registry docker hub.
+
+Steps:
+
+- Configure Jenkins to build Docker images.
+- ﻿﻿Run a container using the built docker image
+- ﻿﻿Access the web application on your we browser.
+- ﻿﻿Push Docker images to a container registry.
+
+
+**Installing Docker**
+
+Before jenkins can run docker commands, we need to install docker on the same instance jenkins was installed. From our shell scripting knowledge, let's install docker with shell script
+
+Create a file named docker.sh
+
+Open the file and paste the script below
+
+```
+
+#!/bin/bash
+
+# Exit on any error
+set -e
+
+echo "Updating system packages..."
+sudo apt update -y
+sudo apt upgrade -y
+
+echo "Installing required dependencies..."
+sudo apt install -y apt-transport-https ca-certificates curl software-properties-common gnupg
+
+echo "Adding Docker’s official GPG key..."
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+echo "Adding Docker repository..."
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu noble stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+echo "Updating package index..."
+sudo apt update -y
+
+echo "Installing Docker..."
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+echo "Starting and enabling Docker service..."
+sudo systemctl start docker
+sudo systemctl enable docker
+
+echo "Adding current user to Docker group..."
+sudo usermod -aG docker $USER
+
+echo "Docker installation completed successfully!"
+echo "Log out and log back in to apply group changes."
+docker --version
+
+
+```
+
+Save and close the file
+
+Make the file executable
+
+
+```
+chmod u+x docker.sh
+
+```
+
+Execute the script
+
+```
+./docker.sh
+
+```
+
+**Building Pipeline Script**
+
+
+Below is our pipeline script:
+
+
+
+```
+
+
+pipeline {
+    agent any
+
     environment {
         APP_NAME = "marketpeak_ecommerce"
-        DOCKER_IMAGE = "your-dockerhub-username/marketpeak"
+        COMMIT_HASH = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+        BUILD_ID = env.BUILD_NUMBER
+        DOCKER_IMAGE = "your-dockerhub-username/marketpeak:$BUILD_ID-$COMMIT_HASH"
         APP_PORT = "8081"
     }
 
@@ -278,10 +396,7 @@ pipeline {
 
         stage('Run Application') {
             steps {
-                // Stop and remove any running instance of the container
                 sh 'docker stop $APP_NAME || true && docker rm $APP_NAME || true'
-
-                // Run the container on port 8081
                 sh 'docker run -d --name $APP_NAME -p $APP_PORT:80 $DOCKER_IMAGE'
             }
         }
@@ -291,7 +406,7 @@ pipeline {
                 branch 'main'
             }
             steps {
-                withDockerRegistry([credentialsId: 'docker-hub-credentials', url: '']) {
+                withDockerRegistry([credentialsId: 'docker-hub-credentials', url: 'https://hub.docker.com/repository/docker/otigerald/']) {
                     sh 'docker push $DOCKER_IMAGE'
                 }
             }
@@ -312,56 +427,180 @@ pipeline {
 ```
 
 
-**From the dashboard menu on the left side, click on new item**
 
-<img width="1422" alt="image" src="https://github.com/user-attachments/assets/c2a9e58c-541d-455c-b0a0-6e883b3a76a2" />
+**Explaining the script**
 
+- Pipeline Structure
 
-Create a pipeline job with name "Capstone pipeline job"
+```
+pipeline {
+    agent any
 
+```
 
-<img width="1420" alt="image" src="https://github.com/user-attachments/assets/bf00cfe8-75b0-445b-90ec-76fe2a37f1cb" />
+pipeline {} → Defines a Jenkins declarative pipeline.   <br> 
+agent any → The pipeline can run on any available agent.
 
+- Environment Variables
 
-**Configure Build Trigger**
+```
+environment {
+    APP_NAME = "marketpeak_ecommerce"
+    COMMIT_HASH = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+    BUILD_ID = env.BUILD_NUMBER
+    DOCKER_IMAGE = "your-dockerhub-username/marketpeak:$BUILD_ID-$COMMIT_HASH"
+    APP_PORT = "8081"
+}
 
-Click on build trigger to configure triggering the job from GitHub webhook
+```
 
-
-<img width="1189" alt="image" src="https://github.com/user-attachments/assets/cf2331d3-65b1-4f34-879e-e8811d99d629" />
-
-
-Create a github webhook using jenkins ip address and port (No need to repeat. We have already done this in the previous section)
-
-
-<img width="1188" alt="image" src="https://github.com/user-attachments/assets/ace66165-8ee5-4af0-925c-54f1e6f2457e" />
-
-
-Lets write our pipeline script
-
-
-
-
-
-
-
-
-
+APP_NAME → The name of the running container.
+COMMIT_HASH → Gets the short commit hash of the latest commit.
+BUILD_ID → Jenkins build number (unique per build).
+DOCKER_IMAGE → Defines the Docker image name and tags it uniquely using BUILD_ID and COMMIT_HASH.
+(Example: your-dockerhub-username/marketpeak:15-a1b2c3d where 15 is the build number, and a1b2c3d is the commit hash.)
+APP_PORT → Exposes the application on port 8081.
 
 
+- Pipeline Stages
+
+```
+stage('Clone Repository') {
+    steps {
+        git 'https://github.com/goti13/MarketPeak_Ecommerce.git'
+    }
+}
+
+
+```
+
+Pulls the source code from GitHub.
+
+
+- Build Docker Image
+
+
+```
+
+stage('Build Docker Image') {
+    steps {
+        sh 'docker build -t $DOCKER_IMAGE .'
+    }
+}
+
+```
+
+- Run Application
+
+```
+stage('Run Application') {
+    steps {
+        sh 'docker stop $APP_NAME || true && docker rm $APP_NAME || true'
+        sh 'docker run -d --name $APP_NAME -p $APP_PORT:80 $DOCKER_IMAGE'
+    }
+}
+
+```
+
+Stops & removes any running container with the same name (APP_NAME).    <br> 
+Runs the application inside a Docker container.    <br> 
+Maps port 8081 (APP_PORT) on the server to port 80 inside the container.   
+
+- Push to DockerHub (Only for main Branch)
+
+```
+stage('Push to DockerHub') {
+    when {
+        branch 'main'
+    }
+    steps {
+        withDockerRegistry([credentialsId: 'docker-hub-credentials', url: 'https://hub.docker.com/repository/docker/otigerald/']) {
+            sh 'docker push $DOCKER_IMAGE'
+        }
+    }
+}
+
+```
+
+Runs only if the branch is main (when { branch 'main' }).    <br> 
+Authenticates with DockerHub using credentials stored in Jenkins (docker-hub-credentials).    <br> 
+Pushes the built image to the DockerHub repository.   
+
+- Post-Build Actions
+
+```
+
+post {
+    success {
+        echo "Application is running at http://<server-ip>:8081"
+    }
+    failure {
+        echo "Build failed. Check logs!"
+    }
+}
+
+```
+
+If the pipeline succeeds, it prints "Application is running at http://<server-ip>:8081".    <br> 
+If the pipeline fails, it prints "Build failed. Check logs!".
+
+- Key Takeaways
+
+Every build creates a uniquely tagged Docker image using $BUILD_ID and $COMMIT_HASH.    <br> 
+Runs the application in a Docker container and exposes it on port 8081.    <br> 
+Only pushes to DockerHub when running on the main branch.    <br> 
+Uses stored credentials (docker-hub-credentials) to authenticate with DockerHub.   
+
+- What Happens When You Push a Change?
+
+Webhook triggers Jenkins.    <br> 
+Jenkins pulls the latest code.    <br> 
+Jenkins builds a new Docker image.    <br> 
+Jenkins runs the container.    <br> 
+If the branch is main, Jenkins pushes the image to DockerHub.    <br> 
+Jenkins prints the application URL if successful.   
+
+**Save the pipepline script**
+
+
+<img width="1435" alt="image" src="https://github.com/user-attachments/assets/bb306fca-a4ff-4438-b4bf-cb1ed2c514b4" />
+
+
+<img width="1340" alt="image" src="https://github.com/user-attachments/assets/4cc0d95a-11f1-46b7-b9dd-d663b3dd7498" />
 
 
 
 
+<img width="1355" alt="image" src="https://github.com/user-attachments/assets/8f1de1d7-2730-4590-a234-cd5121206b26" />
 
 
 
+**Store DockerHub Credentials in Jenkins**
+
+Go to Manage Jenkins → Manage Credentials. → Click (global) under "Stores scoped to Jenkins". → Click Add Credentials (on the left). 
+
+
+<img width="1420" alt="image" src="https://github.com/user-attachments/assets/1af76995-9430-4c25-badf-05bd22671d8c" />
+
+
+<img width="1425" alt="image" src="https://github.com/user-attachments/assets/9e73cfee-46de-4be1-91ae-0b7903961eb1" />
+
+
+<img width="1429" alt="image" src="https://github.com/user-attachments/assets/4c7846c1-bd96-4429-af28-615b2dad5744" />
 
 
 
+Select:
+
+Kind: Username with password  <br>
+Scope: Global
+Username: (Your DockerHub username)  <br>
+Password: (Your DockerHub password or access token)  <br>
+ID: docker-hub-credentials (This is the ID used in the pipeline)  <br>
+Description: "DockerHub Credentials"
 
 
-
+<img width="1148" alt="image" src="https://github.com/user-attachments/assets/aca90be5-55c8-4f27-86a9-a1d7bf8eb165" />
 
 
 
