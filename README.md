@@ -374,40 +374,53 @@ pipeline {
     agent any
 
     environment {
-        APP_NAME = "marketpeak_ecommerce"
-        COMMIT_HASH = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-        BUILD_ID = env.BUILD_NUMBER
-        DOCKER_IMAGE = "your-dockerhub-username/marketpeak:$BUILD_ID-$COMMIT_HASH"
+        APP_NAME = "e-commerce"
+        DOCKER_HUB_USER = "otigerald"
+        DOCKER_IMAGE = "${DOCKER_HUB_USER}/${APP_NAME}:${env.BUILD_NUMBER}"
         APP_PORT = "8081"
+    }
+
+    triggers {
+        // Trigger the pipeline on a GitHub push event
+        githubPush()
     }
 
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/goti13/MarketPeak_Ecommerce.git'
+                git branch: 'main', url: 'https://github.com/goti13/MarketPeak_Ecommerce.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $DOCKER_IMAGE .'
+                script {
+                    echo "Building Docker image..."
+                    sh "docker build -t ${DOCKER_IMAGE} ."
+                }
             }
         }
 
-        stage('Run Application') {
+        stage('Run Docker Container') {
             steps {
-                sh 'docker stop $APP_NAME || true && docker rm $APP_NAME || true'
-                sh 'docker run -d --name $APP_NAME -p $APP_PORT:80 $DOCKER_IMAGE'
+                script {
+                    echo "Stopping and removing any existing container..."
+                    sh "docker stop ${APP_NAME} || true && docker rm ${APP_NAME} || true"
+                    echo "Running new container..."
+                    sh "docker run -d --name ${APP_NAME} -p ${APP_PORT}:80 ${DOCKER_IMAGE}"
+                }
             }
         }
 
-        stage('Push to DockerHub') {
-            when {
-                branch 'main'
-            }
+        stage('Push to Docker Hub') {
             steps {
-                withDockerRegistry([credentialsId: 'docker-hub-credentials', url: 'https://hub.docker.com/repository/docker/otigerald/']) {
-                    sh 'docker push $DOCKER_IMAGE'
+                script {
+                    echo "Logging into Docker Hub..."
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
+                        sh "echo ${DOCKER_HUB_PASSWORD} | docker login -u ${DOCKER_HUB_USERNAME} --password-stdin"
+                    }
+                    echo "Pushing Docker image to Docker Hub..."
+                    sh "docker push ${DOCKER_IMAGE}"
                 }
             }
         }
@@ -415,10 +428,10 @@ pipeline {
 
     post {
         success {
-            echo "Application is running at http://<server-ip>:8081"
+            echo "Docker image built and pushed successfully. Access the web application at http://<server-ip>:${APP_PORT}"
         }
         failure {
-            echo "Build failed. Check logs!"
+            echo "Pipeline failed. Check the logs for more details."
         }
     }
 }
@@ -439,139 +452,233 @@ pipeline {
 ```
 
 pipeline {} → Defines a Jenkins declarative pipeline.   <br> 
-agent any → The pipeline can run on any available agent.
+agent any → Specifies that the pipeline can run on any available agent (Jenkins worker node).
 
 - Environment Variables
+  Defines environment variables used throughout the pipeline:
 
 ```
 environment {
-    APP_NAME = "marketpeak_ecommerce"
-    COMMIT_HASH = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-    BUILD_ID = env.BUILD_NUMBER
-    DOCKER_IMAGE = "your-dockerhub-username/marketpeak:$BUILD_ID-$COMMIT_HASH"
+    APP_NAME = "e-commerce"
+    DOCKER_HUB_USER = "otigerald"
+    DOCKER_IMAGE = "${DOCKER_HUB_USER}/${APP_NAME}:${env.BUILD_NUMBER}"
     APP_PORT = "8081"
 }
 
 ```
 
-APP_NAME → The name of the running container.
-COMMIT_HASH → Gets the short commit hash of the latest commit.
-BUILD_ID → Jenkins build number (unique per build).
-DOCKER_IMAGE → Defines the Docker image name and tags it uniquely using BUILD_ID and COMMIT_HASH.
-(Example: your-dockerhub-username/marketpeak:15-a1b2c3d where 15 is the build number, and a1b2c3d is the commit hash.)
-APP_PORT → Exposes the application on port 8081.
+APP_NAME: Name of the application (used for naming the Docker container and image).
+DOCKER_HUB_USER: Your Docker Hub username.
+DOCKER_IMAGE: The Docker image name and tag, formatted as <DOCKER_HUB_USER>/<APP_NAME>:<BUILD_NUMBER>.
+APP_PORT: The port on which the application will run (mapped to port 80 in the container).
 
 
-- Pipeline Stages
+- Triggers
 
 ```
+
+triggers {
+    // Trigger the pipeline on a GitHub push event
+    githubPush()
+}
+
+```
+
+Automatically triggers the pipeline when a push event occurs on the GitHub repository.
+
+
+- Stages
+
+
+```
+
 stage('Clone Repository') {
     steps {
-        git 'https://github.com/goti13/MarketPeak_Ecommerce.git'
+        git branch: 'main', url: 'https://github.com/goti13/MarketPeak_Ecommerce.git'
     }
 }
 
-
 ```
-
-Pulls the source code from GitHub.
-
+Clones the GitHub repository (MarketPeak_Ecommerce) from the main branch.
 
 - Build Docker Image
 
-
 ```
-
 stage('Build Docker Image') {
     steps {
-        sh 'docker build -t $DOCKER_IMAGE .'
-    }
-}
-
-```
-
-- Run Application
-
-```
-stage('Run Application') {
-    steps {
-        sh 'docker stop $APP_NAME || true && docker rm $APP_NAME || true'
-        sh 'docker run -d --name $APP_NAME -p $APP_PORT:80 $DOCKER_IMAGE'
-    }
-}
-
-```
-
-Stops & removes any running container with the same name (APP_NAME).    <br> 
-Runs the application inside a Docker container.    <br> 
-Maps port 8081 (APP_PORT) on the server to port 80 inside the container.   
-
-- Push to DockerHub (Only for main Branch)
-
-```
-stage('Push to DockerHub') {
-    when {
-        branch 'main'
-    }
-    steps {
-        withDockerRegistry([credentialsId: 'docker-hub-credentials', url: 'https://hub.docker.com/repository/docker/otigerald/']) {
-            sh 'docker push $DOCKER_IMAGE'
+        script {
+            echo "Building Docker image..."
+            sh "docker build -t ${DOCKER_IMAGE} ."
         }
     }
 }
 
 ```
 
-Runs only if the branch is main (when { branch 'main' }).    <br> 
-Authenticates with DockerHub using credentials stored in Jenkins (docker-hub-credentials).    <br> 
-Pushes the built image to the DockerHub repository.   
+Builds a Docker image using the Dockerfile in the repository.  <br>
+Tags the image with the name and version specified in DOCKER_IMAGE.
 
-- Post-Build Actions
+- Run Docker Container
 
 ```
-
-post {
-    success {
-        echo "Application is running at http://<server-ip>:8081"
-    }
-    failure {
-        echo "Build failed. Check logs!"
+stage('Run Docker Container') {
+    steps {
+        script {
+            echo "Stopping and removing any existing container..."
+            sh "docker stop ${APP_NAME} || true && docker rm ${APP_NAME} || true"
+            echo "Running new container..."
+            sh "docker run -d --name ${APP_NAME} -p ${APP_PORT}:80 ${DOCKER_IMAGE}"
+        }
     }
 }
 
 ```
 
-If the pipeline succeeds, it prints "Application is running at http://<server-ip>:8081".    <br> 
-If the pipeline fails, it prints "Build failed. Check logs!".
+Stops and removes any existing container with the same name (APP_NAME).  <br> 
+Runs a new Docker container using the built image:  <br> 
+-d: Runs the container in detached mode (in the background).  <br>
+--name ${APP_NAME}: Names the container.  <br>
+-p ${APP_PORT}:80: Maps port 8081 on the host to port 80 in the container.
 
-- Key Takeaways
 
-Every build creates a uniquely tagged Docker image using $BUILD_ID and $COMMIT_HASH.    <br> 
-Runs the application in a Docker container and exposes it on port 8081.    <br> 
-Only pushes to DockerHub when running on the main branch.    <br> 
-Uses stored credentials (docker-hub-credentials) to authenticate with DockerHub.   
+- Push to Docker Hub
 
-- What Happens When You Push a Change?
+```
+stage('Push to Docker Hub') {
+    steps {
+        script {
+            echo "Logging into Docker Hub..."
+            withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
+                sh "echo ${DOCKER_HUB_PASSWORD} | docker login -u ${DOCKER_HUB_USERNAME} --password-stdin"
+            }
+            echo "Pushing Docker image to Docker Hub..."
+            sh "docker push ${DOCKER_IMAGE}"
+        }
+    }
+}
 
-Webhook triggers Jenkins.    <br> 
-Jenkins pulls the latest code.    <br> 
-Jenkins builds a new Docker image.    <br> 
-Jenkins runs the container.    <br> 
-If the branch is main, Jenkins pushes the image to DockerHub.    <br> 
-Jenkins prints the application URL if successful.   
+```
 
+Logs into Docker Hub using credentials stored in Jenkins (docker-hub-credentials).  <br>
+Pushes the Docker image to Docker Hub.
+
+
+- Post Actions
+
+Success
+
+```
+
+post {
+    success {
+        echo "Docker image built and pushed successfully. Access the web application at http://<server-ip>:${APP_PORT}"
+    }
+}
+
+```
+Prints a success message with the URL to access the application.
+
+Failure
+
+```
+
+failure {
+    echo "Pipeline failed. Check the logs for more details."
+}
+
+```
+
+Prints a failure message if the pipeline fails.
+
+**How the Pipeline Works**
+
+1. Trigger:
+   
+ - The pipeline is triggered by a push to the main branch of the GitHub repository.
+   
+2. Clone Repository:
+   
+ - The repository is cloned to the Jenkins workspace.
+   
+3. Build Docker Image:
+   
+ - A Docker image is built using the Dockerfile in the repository.
+   
+4. Run Docker Container:
+   
+ - Any existing container with the same name is stopped and removed.
+   
+ - A new container is started using the built image.
+   
+5. Push to Docker Hub:
+   
+ - The Docker image is pushed to Docker Hub for later use or deployment.
+      
+6. Post Actions:
+   
+ - If the pipeline succeeds, a success message is printed.
+   
+ - If the pipeline fails, a failure message is printed.
+
+
+**Key Points**
+
+- Environment Variables:
+  DOCKER_IMAGE dynamically includes the build number, ensuring unique tags for each build.
+  APP_PORT allows you to map the container port to a specific host port.
+
+- Docker Commands:
+  docker build: Builds the image.
+  docker run: Runs the container.
+  docker push: Pushes the image to Docker Hub.
+
+- Error Handling:
+  The || true in docker stop and docker rm ensures that the pipeline continues even if no container exists to stop or remove.
+
+- Credentials:
+  Docker Hub credentials are securely managed using Jenkins credentials.
+
+  
 **Save the pipepline script**
 
 
-<img width="1435" alt="image" src="https://github.com/user-attachments/assets/bb306fca-a4ff-4438-b4bf-cb1ed2c514b4" />
+From the dashboard menu on the left side, click on new item
 
 
-<img width="1340" alt="image" src="https://github.com/user-attachments/assets/4cc0d95a-11f1-46b7-b9dd-d663b3dd7498" />
+<img width="1439" alt="image" src="https://github.com/user-attachments/assets/cbc2e63e-8eb2-4674-803b-6935c477250b" />
+
+
+Create a pipeline job and name it "CapstonePipelineJob"
+
+
+<img width="1184" alt="image" src="https://github.com/user-attachments/assets/a4524f46-b5b9-4c9e-aa4e-1541ae54fa8d" />
+
+
+**Configure Build Trigger**
+
+Click "Configure" your job and add this configurations
+
+Click on build trigger to configure triggering the job from GitHub webhook
+
+<img width="1228" alt="image" src="https://github.com/user-attachments/assets/efac06ce-eb67-4171-a543-ba9790813065" />
+
+
+Create a github webhook using jenkins ip address and port
+
+
+<img width="1173" alt="image" src="https://github.com/user-attachments/assets/e1a0f685-4567-406a-9af3-af0939e416c0" />
+
+
+Paste the pipeline script above into the pipeline section and save.
+
+
+Login to your docker registor and create a new repository using the  APP_NAME value= "e-commerce" we created a repository in docker
 
 
 
 
-<img width="1320" alt="image" src="https://github.com/user-attachments/assets/6b73ee6c-6702-44c8-ab13-8cd21aef491a" />
+<img width="1409" alt="image" src="https://github.com/user-attachments/assets/f21d3985-d289-45ea-a2e0-9e0b13c0c41b" />
+
 
 
 
