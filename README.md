@@ -757,5 +757,15 @@ To access the index.html of our application file on our web browser, we need to 
 <img width="1434" alt="image" src="https://github.com/user-attachments/assets/eb8dd13a-963a-4970-b332-d21ccce93ad8" />
 
 
+Access the application:
+
+```
+
+https://server-ip:8081/html
+
+```
+
+
+![image](https://github.com/user-attachments/assets/1beab958-3d6f-41d3-909d-4a56f30b5f0b)
 
 
