@@ -672,14 +672,19 @@ Create a github webhook using jenkins ip address and port
 Paste the pipeline script above into the pipeline section and save.
 
 
-Login to your docker registor and create a new repository using the  APP_NAME value= "e-commerce" we created a repository in docker
-
-
-
-
 <img width="1409" alt="image" src="https://github.com/user-attachments/assets/f21d3985-d289-45ea-a2e0-9e0b13c0c41b" />
 
 
+Login to your docker registry (https://hub.docker.com/repositories/) and create a new repository 
+
+
+<img width="1434" alt="image" src="https://github.com/user-attachments/assets/1856dc96-2aa1-428d-81a4-54d783c86788" />
+
+
+The name of the repository must same with value= "e-commerce" from our pipeline script
+
+
+<img width="1430" alt="image" src="https://github.com/user-attachments/assets/d8335c78-6497-4ab9-a196-3fdf74e551b2" />
 
 
 
