@@ -360,6 +360,38 @@ Execute the script
 
 ```
 
+**Dockerfile creation**
+
+- Install the plugins Docker and docker pipeline
+
+- create the dockerfile in the repository folder in github
+
+```
+
+# Use the official NGINX image as the base image
+FROM nginx:latest
+
+# Set the working directory in the container
+WORKDIR /usr/share/nginx/html/
+
+# Copy all files and directories from the local repository to the working directory
+COPY . .
+
+# Expose port 80 to allow external access
+EXPOSE 80
+
+```
+
+- Grant the jenkins user permission:
+  The Docker daemon requires root or docker group privileges to interact with it. You need to add the Jenkins user to the docker group
+
+```
+sudo usermod -aG docker jenkins
+sudo systemctl restart jenkins
+
+```
+
+
 **Building Pipeline Script**
 
 
