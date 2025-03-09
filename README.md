@@ -241,6 +241,98 @@ Create a github webhook using jenkins ip address and port
 
 
 
+
+Set Up a Freestyle Job for Running Unit Tests
+
+Step 1: Create a New Freestyle Job
+
+i. Click on New Item on the Jenkins dashboard.
+
+<img width="1440" alt="image" src="https://github.com/user-attachments/assets/c68102b8-aaf9-4868-b386-0f8f16f9ee01" />
+
+Ii. Enter a name for your job (e.g., Run-Unit-Tests).
+Iii. Select Freestyle project and click OK.
+
+
+<img width="1421" alt="image" src="https://github.com/user-attachments/assets/49f79793-236f-4981-b827-c2169a0919b3" />
+
+
+Step 2: General Settings:
+
+
+i. Add a description (e.g., "This job runs unit tests for the web application").
+
+<img width="1428" alt="image" src="https://github.com/user-attachments/assets/9e11c460-63e1-46c5-841f-13eb8e01abe2" />
+
+
+ii. Source Code Management:
+
+
+- Select Git.
+- Enter the repository URL (e.g., https://github.com/your-repo/your-webapp.git).
+- Specify the branch (e.g., main or master).
+
+
+<img width="1432" alt="image" src="https://github.com/user-attachments/assets/b2c12e90-e315-43ea-bf23-fea9dc7b4ccf" />
+
+
+iii. Build Triggers:
+
+Optionally, set up triggers such as:
+
+Poll SCM: Poll the repository for changes at regular intervals.
+
+<img width="1429" alt="image" src="https://github.com/user-attachments/assets/ffba4b88-213e-4dc1-aca3-c2f6ef5c963c" />
+
+
+iv. Build Environment:
+
+
+Optionally, configure build environment settings such as:
+
+
+Delete workspace before build starts: Ensures a clean workspace for each build.
+
+
+Add timestamps to the Console Output: Adds timestamps to the build logs.
+
+
+<img width="1419" alt="image" src="https://github.com/user-attachments/assets/bd623282-85b1-417f-bd68-e7b44fe0cf21" />
+
+
+v. Build Steps:
+
+Add a build step to execute a shell command or script:
+
+
+Click Add build step and select Execute shell.
+
+
+Enter the commands to run unit tests.  
+
+<img width="1147" alt="image" src="https://github.com/user-attachments/assets/9c65e0ef-6b30-4438-b1bc-84d390d6f449" />
+
+
+```
+
+echo "Installing dependencies..."
+npm install
+
+echo "Validating HTML..."
+npx html-validator --file=src/index.html
+
+echo "Build completed. Minified files are in the 'dist' directory."
+
+```
+
+<img width="1357" alt="image" src="https://github.com/user-attachments/assets/8120e635-7674-4263-985f-a092ba6ef5a0" />
+
+
+<img width="1409" alt="image" src="https://github.com/user-attachments/assets/add23f36-b90c-4efe-81f8-482d316bbbbc" />
+
+
+
+
 4. Jenkins Pipeline for Web Application
    
 Objective: Develop a Jenkins Pipeline for running a web application.
